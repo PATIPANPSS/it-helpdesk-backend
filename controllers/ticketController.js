@@ -40,11 +40,17 @@ exports.getAllTicket = async (req, res) => {
     let values = [];
 
     if (userRole === "it_support" || userRole === "admin") {
-      sql = "SELECT * FROM tickets ORDER BY created_at DESC";
+      sql = `SELECT tickets.*, users.employee_id 
+        FROM tickets 
+        LEFT JOIN users ON tickets.requester_id = users.id 
+        ORDER BY tickets.created_at DESC`;
       values = [];
     } else {
-      sql =
-        "SELECT * FROM tickets WHERE requester_id = ? ORDER BY created_at DESC";
+      sql = `SELECT tickets.*, users.employee_id 
+        FROM tickets 
+        LEFT JOIN users ON tickets.requester_id = users.id 
+        WHERE tickets.requester_id = ? 
+        ORDER BY tickets.created_at DESC`;
       values = [userId];
     }
 
