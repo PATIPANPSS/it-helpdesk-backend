@@ -72,16 +72,25 @@ exports.getTicketById = async (req, res) => {
     const ticketId = req.params.id;
 
     const sql = "SELECT * FROM tickets WHERE id = ?";
-
     const [tickets] = await db.query(sql, [ticketId]);
 
     if (tickets.length === 0) {
       return res.status(404).json({ message: "ไม่พบใบแจ้งซ่อมที่ระบุ" });
     }
+    
+    const logsSql = `SELECT 
+        ticket_logs.*, 
+        users.employee_id 
+      FROM ticket_logs 
+      LEFT JOIN users ON ticket_logs.user_id = users.id 
+      WHERE ticket_logs.ticket_id = ? 
+      ORDER BY ticket_logs.id DESC`;
+    const [logs] = await db.query(logsSql, [ticketId]);
 
     res.status(200).json({
       message: "ดึงข้อมูลสำเร็จ",
       ticket: tickets[0],
+      logs: logs
     });
   } catch (error) {
     console.error("ระบบดึงข้อมูลรายบุคคลขัดข้อง:", error);
