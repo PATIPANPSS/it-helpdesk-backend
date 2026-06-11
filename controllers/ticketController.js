@@ -36,6 +36,10 @@ exports.getAllTicket = async (req, res) => {
     const userRole = req.user.role;
     const userId = req.user.id;
 
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const offset = (page - 1) * limit;
+
     let sql = "";
     let values = [];
 
@@ -43,21 +47,25 @@ exports.getAllTicket = async (req, res) => {
       sql = `SELECT tickets.*, users.employee_id 
         FROM tickets 
         LEFT JOIN users ON tickets.requester_id = users.id 
-        ORDER BY tickets.created_at DESC`;
-      values = [];
+        ORDER BY tickets.created_at DESC LIMIT ? OFFSET ?`;
+      values = [limit, offset];
     } else {
       sql = `SELECT tickets.*, users.employee_id 
         FROM tickets 
         LEFT JOIN users ON tickets.requester_id = users.id 
         WHERE tickets.requester_id = ? 
-        ORDER BY tickets.created_at DESC`;
-      values = [userId];
+        ORDER BY tickets.created_at DESC LIMIT ? OFFSET ?`;
+      values = [userId, limit, offset];
     }
 
     const [tickets] = await db.query(sql, values);
 
     res.status(200).json({
       message: "ดึงข้อมูลสำเร็จ",
+      meta: {
+        currentPage: page,
+        itemsPerPage: limit,
+      },
       total_tickets: tickets.length,
       tickets: tickets,
     });
