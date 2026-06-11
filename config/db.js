@@ -1,10 +1,12 @@
 const mysql = require('mysql2');
+require('dotenv').config();
 
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'patipan110544',
-    database: 'it_helpdesk'
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'patipan110544',
+    database: process.env.DB_NAME || 'it_helpdesk',
+    port: process.env.DB_PORT || 3306
 });
 
 db.getConnection((err, connection) => {
